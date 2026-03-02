@@ -1,5 +1,5 @@
 {
-  "alarm_sender_ids": ["D08FS6LTE9M", "D08FS6LT1HV"],
+  "alarm_sender_ids": ["U08FS6G42R5", "U08G830JRGB"],
   "check_interval": 5,
   "buzzer_sound_path": "buzzer.mp3"
 }
