@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import sys
+import winsound
 from playsound import playsound
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
@@ -45,16 +46,21 @@ if not SLACK_TOKEN:
     sys.exit(1)
 
 
-# --- SOUND ---
 def play_alarm(sound_path):
     try:
+        # Play the file as usual
         playsound(sound_path)
     except Exception as e:
         logger.warning(f"Could not play sound '{sound_path}': {e}")
-        # Fallback: print a visible alert
-        print("\n" + "🚨 " * 20)
-        print("         WAKE UP! NEW MESSAGE!")
-        print("🚨 " * 20 + "\n")
+    
+    # ADD THIS: A guaranteed system beep that often ignores headphone levels
+    # Frequency: 1000Hz, Duration: 2000ms
+    winsound.Beep(1000, 4000) 
+    
+    # Your existing visual fallback
+    print("\n" + "🚨 " * 20)
+    print("         WAKE UP! NEW MESSAGE!")
+    print("🚨 " * 20 + "\n")
 
 
 # --- CORE WATCHER ---
