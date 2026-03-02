@@ -46,21 +46,28 @@ if not SLACK_TOKEN:
     sys.exit(1)
 
 
+# --- SOUND ---
 def play_alarm(sound_path):
+    """
+    Plays the sound in a continuous loop until the user 
+    manually stops the program with Ctrl+C.
+    """
+    logger.warning("🚨 ALARM ACTIVATED! Persistent alert mode. Press Ctrl+C to stop.")
     try:
-        # Play the file as usual
-        playsound(sound_path)
+        while True:  # Continuous loop for persistent alarm
+            playsound(sound_path)
+            # Short pause between repeats so it doesn't crash the audio driver
+            time.sleep(1) 
+    except KeyboardInterrupt:
+        # This allows the user to stop the loop with Ctrl+C
+        raise 
     except Exception as e:
         logger.warning(f"Could not play sound '{sound_path}': {e}")
-    
-    # ADD THIS: A guaranteed system beep that often ignores headphone levels
-    # Frequency: 1000Hz, Duration: 2000ms
-    winsound.Beep(1000, 4000) 
-    
-    # Your existing visual fallback
-    print("\n" + "🚨 " * 20)
-    print("         WAKE UP! NEW MESSAGE!")
-    print("🚨 " * 20 + "\n")
+        while True:
+            print("\n" + "🚨 " * 20)
+            print("         WAKE UP! NEW MESSAGE!")
+            print("🚨 " * 20 + "\n")
+            time.sleep(2)
 
 
 # --- CORE WATCHER ---
@@ -84,15 +91,14 @@ def check_for_pokes(client, config):
                 history = client.conversations_history(
                     channel=channel["id"],
                     oldest=last_check_ts,
-                    limit=5  # Grab a few in case multiple arrive at once
+                    limit=5
                 )
 
                 messages = history.get("messages", [])
                 if messages:
-                    logger.warning(f"🚨 WAKE UP! {len(messages)} new message(s) from a VIP!")
+                    # Once a message is found, enter the infinite alarm loop
                     play_alarm(buzzer_sound_path)
 
-            # Always update timestamp after each full cycle
             last_check_ts = str(time.time())
 
         except SlackApiError as e:
